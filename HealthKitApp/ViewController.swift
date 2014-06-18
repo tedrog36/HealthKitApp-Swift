@@ -193,8 +193,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                                         self.updateBPM(UInt16(value))
                                     }
                                     // retrieve source from sample
-                                    if let source = sample.source {
-                                        let name = source.name
+                                    if let name = sample.source?.name {
                                         self.updateDeviceName(name)
                                     }
                                     // retrieve meta data from sample - sensor location
@@ -251,30 +250,32 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     func updateBPM(bpm: UInt16) {
         bpmLabel.text = String(bpm)
-        //        var completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        }
     }
     
+    // This method is called once and the expectation is that it will
+    // keep calling itself forever
     func animateHeart() {
+        if (heartBeatDuration == 0.0) {
+            // nothing happening, so check later in half a second
+            heartImageView.frame = origHeartRect
+            updateBPM(0)
+            NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: Selector("animateHeart"), userInfo: nil, repeats: false)
+            return;
+        }
+        // animate the heart
         let animation:(() -> Void) = {
-            if (self.heartBeatDuration > 0.0) {
-                var newHeartRect = self.origHeartRect
-                if (!self.heartIsSmall) {
-                    newHeartRect = CGRectInset(newHeartRect, 20, 20)
-                }
-                self.heartIsSmall = !self.heartIsSmall
-                self.heartImageView.frame = newHeartRect
+            var newHeartRect = self.origHeartRect
+            if (!self.heartIsSmall) {
+                newHeartRect = CGRectInset(newHeartRect, 20, 20)
             }
+            self.heartIsSmall = !self.heartIsSmall
+            self.heartImageView.frame = newHeartRect
         }
         let completion:((Bool) -> Void) = { (Bool finished) in
             //println("animation complete")
             self.animateHeart()
         }
+        let duration = heartBeatDuration == 0.0 ? 0.5 : (heartBeatDuration/2.0)
         UIView.animateWithDuration(heartBeatDuration/2.0, animations: animation, completion: completion)
     }
     
@@ -282,12 +283,19 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     func newBluetoothState(blueToothOn: Bool, blueToothState: String) {
         println("blueToothOn = \(blueToothOn) blueToothState = \(blueToothState)")
+        if (!blueToothOn) {
+            heartBeatDuration = 0.0
+            updateDeviceName("No device connected")
+        }
     }
     
-    func newDeviceName(deviceName: String) {
-        if (deviceName != deviceLabel.text){
-            deviceLabel.text = deviceName;           
-        }
+    func deviceConnected(deviceName: String) {
+        updateDeviceName(deviceName)
+    }
+    
+    func deviceDisconnected() {
+        heartBeatDuration = 0.0
+        updateDeviceName("No device connected")
     }
     
     func newLocation(location: Int) {

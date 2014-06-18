@@ -10,8 +10,9 @@ import Foundation
 import CoreBluetooth
 
 protocol BTDeviceManagerDelegate {
+    func deviceConnected(deviceName: String)
+    func deviceDisconnected()
     func newBluetoothState(blueToothOn: Bool, blueToothState: String)
-    func newDeviceName(deviceName: String)
     func newLocation(location: Int)
     func newBPM(bpm: UInt16)
 }
@@ -81,11 +82,6 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     func connectToPeripheral(peripheral: CBPeripheral) {
         _heartRateMonitor = peripheral;
         _centralManager.connectPeripheral(peripheral, options: nil)
-        dispatch_async(dispatch_get_main_queue(), {
-            if let delegate = self.delegate {
-                delegate.newDeviceName(peripheral.name)
-            }
-        })
     }
     
     // update the heart rate monitor value
@@ -146,6 +142,11 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     
     func centralManager(central: CBCentralManager!, didConnectPeripheral peripheral: CBPeripheral!) {
         println("\(__FUNCTION__)")
+        dispatch_async(dispatch_get_main_queue(), {
+            if let delegate = self.delegate {
+                delegate.deviceConnected(peripheral.name)
+            }
+        })
         // get the id of this peripheral
         let deviceId = peripheral.identifier
         println("deviceId = \(deviceId)")
@@ -167,6 +168,11 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
             println("\(__FUNCTION__): error = \(error.description)")
             return
         }
+        dispatch_async(dispatch_get_main_queue(), {
+            if let delegate = self.delegate {
+                delegate.deviceDisconnected()
+            }
+        })
     }
     
     func centralManager(central: CBCentralManager!, didDiscoverPeripheral peripheral: CBPeripheral!, advertisementData: NSDictionary!, RSSI: NSNumber!) {
