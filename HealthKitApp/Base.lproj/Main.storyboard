@@ -1,25 +1,147 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6162" systemVersion="14A238h" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6154.17" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="DVH-8g-GbV">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6160"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6153.11"/>
     </dependencies>
     <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="hl3-rX-7ga">
+            <objects>
+                <navigationController navigationBarHidden="YES" id="DVH-8g-GbV" sceneMemberID="viewController">
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="YEt-sv-u8y">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="rootViewController" id="iBV-gn-qUa"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="e0B-XA-GRt" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-928" y="108"/>
+        </scene>
         <!--View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModule="HealthKitApp" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                        <rect key="frame" x="0.0" y="64" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Device:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6H-qn-2cZ">
+                                <rect key="frame" x="20" y="345" width="79" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="79" id="sPd-6g-Aem"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="No device connected" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tzj-lb-g0B">
+                                <rect key="frame" x="107" y="345" width="193" height="21"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Location:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BAy-Yd-YpR">
+                                <rect key="frame" x="20" y="373" width="79" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zc0-Lo-zBG">
+                                <rect key="frame" x="236" y="40" width="64" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="64" id="bYO-oH-qRf"/>
+                                </constraints>
+                                <state key="normal" title="Find">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="findClicked:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="8ct-Ch-HWo"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hyz-4t-Z2E">
+                                <rect key="frame" x="20" y="40" width="64" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="64" id="wdG-oD-xx9"/>
+                                </constraints>
+                                <state key="normal" title="Scan">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="scanClicked:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="gNf-Qv-ChM"/>
+                                </connections>
+                            </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Beating-heart.png" translatesAutoresizingMaskIntoConstraints="NO" id="VCj-Jw-EHs">
+                                <rect key="frame" x="20" y="78" width="280" height="259"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="259" id="8rx-Mq-THC"/>
+                                    <constraint firstAttribute="width" constant="280" id="uO6-ix-LDZ"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VN9-PB-H3v">
+                                <rect key="frame" x="116" y="168" width="89" height="46"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="89" id="2UJ-M9-2z8"/>
+                                    <constraint firstAttribute="height" constant="46" id="YTj-qR-tpZ"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="32"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Unknown" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9um-Qc-Q6g">
+                                <rect key="frame" x="107" y="373" width="193" height="21"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="9um-Qc-Q6g" firstAttribute="baseline" secondItem="BAy-Yd-YpR" secondAttribute="baseline" id="69G-Nt-0qO"/>
+                            <constraint firstItem="VN9-PB-H3v" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="148" id="CgS-qz-l8Z"/>
+                            <constraint firstItem="BAy-Yd-YpR" firstAttribute="leading" secondItem="I6H-qn-2cZ" secondAttribute="leading" id="Cy0-Ku-ZgK"/>
+                            <constraint firstItem="Hyz-4t-Z2E" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="20" symbolic="YES" id="HHj-px-YWH"/>
+                            <constraint firstItem="Tzj-lb-g0B" firstAttribute="baseline" secondItem="I6H-qn-2cZ" secondAttribute="baseline" id="IYc-Ka-uXi"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="trailing" secondItem="Tzj-lb-g0B" secondAttribute="trailing" id="L4r-Pv-HOU"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="centerX" secondItem="VN9-PB-H3v" secondAttribute="centerX" id="L90-du-4Ho"/>
+                            <constraint firstItem="Zc0-Lo-zBG" firstAttribute="baseline" secondItem="Hyz-4t-Z2E" secondAttribute="baseline" id="NRA-rw-jgy"/>
+                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="top" secondItem="VCj-Jw-EHs" secondAttribute="bottom" constant="8" symbolic="YES" id="OIb-Hd-5uo"/>
+                            <constraint firstItem="BAy-Yd-YpR" firstAttribute="top" secondItem="I6H-qn-2cZ" secondAttribute="bottom" constant="8" symbolic="YES" id="ZmH-d8-f2d"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="top" secondItem="Hyz-4t-Z2E" secondAttribute="bottom" constant="8" symbolic="YES" id="bL9-9U-C48"/>
+                            <constraint firstItem="Hyz-4t-Z2E" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="20" id="cg3-bs-k3A"/>
+                            <constraint firstItem="9um-Qc-Q6g" firstAttribute="leading" secondItem="BAy-Yd-YpR" secondAttribute="trailing" constant="8" symbolic="YES" id="dtN-Eb-ZEe"/>
+                            <constraint firstItem="Tzj-lb-g0B" firstAttribute="leading" secondItem="9um-Qc-Q6g" secondAttribute="leading" id="eFa-Jh-ky2"/>
+                            <constraint firstItem="Tzj-lb-g0B" firstAttribute="leading" secondItem="I6H-qn-2cZ" secondAttribute="trailing" constant="8" symbolic="YES" id="gDL-Vw-tr9"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="trailing" secondItem="Zc0-Lo-zBG" secondAttribute="trailing" id="iSu-Ag-Vhz"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="leading" secondItem="Hyz-4t-Z2E" secondAttribute="leading" id="jC6-si-DTg"/>
+                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="leading" secondItem="VCj-Jw-EHs" secondAttribute="leading" id="t6o-Yx-7Jb"/>
+                            <constraint firstItem="Tzj-lb-g0B" firstAttribute="trailing" secondItem="9um-Qc-Q6g" secondAttribute="trailing" id="xpk-Wj-sEl"/>
+                        </constraints>
                     </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <navigationItem key="navigationItem" id="KFs-Z6-oUY"/>
+                    <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+                    <connections>
+                        <outlet property="bpmLabel" destination="VN9-PB-H3v" id="eBd-Jr-jBm"/>
+                        <outlet property="deviceLabel" destination="Tzj-lb-g0B" id="G7g-vn-sy8"/>
+                        <outlet property="locationLabel" destination="9um-Qc-Q6g" id="8tx-tx-1jW"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-368" y="168"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Beating-heart.png" width="507" height="463"/>
+    </resources>
 </document>
