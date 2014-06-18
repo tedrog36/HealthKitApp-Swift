@@ -27,22 +27,31 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     var deviceSensorLocation = HKHeartRateSensorLocation.Other
     // the device sensor location returned from HealthKit
     var location = HKHeartRateSensorLocation.Other
+    // track current state of heart animation
+    var heartIsSmall = false;
+    // track initial size of heart
+    var origHeartRect: CGRect!
+    // heart beat duration
+    var heartBeatDuration = 0.0
     
     // MARK: outlets
     @IBOutlet var deviceLabel : UILabel
     @IBOutlet var locationLabel : UILabel
     @IBOutlet var bpmLabel : UILabel
+    @IBOutlet var heartImageView: UIImageView
     
     // MARK: UIViewController overrides
     
     override func viewDidLoad() {
         super.viewDidLoad()
         println("viewDidLoad thread = \(NSThread.currentThread()) queue = \(dispatch_get_current_queue())")
+        origHeartRect = heartImageView.frame
         // init the Bluetooth device manager
         _deviceManager = BTDeviceManager()
         _deviceManager.delegate = self
         // get HealthKit up and running
         requestHealthKitSharing()
+        animateHeart()
     }
 
     override func didReceiveMemoryWarning() {
@@ -60,7 +69,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
         // get our types to read and write for sharing permissions
         let typesToWrite = dataTypesToWrite()
         let typesToRead = dataTypesToRead()
-        // create our help store
+        // create our health store
         let myHealthStore = HKHealthStore()
         
         // illustrate a few ways of handling the closure
@@ -126,7 +135,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
 //        }
 //
 //        // create a variable to hold the closure
-//        var completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
+//        let completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
 //            if success {
 //                println("successfully registered to share types")
 //            } else if (error) {
@@ -180,6 +189,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                                     // retreve value from sample
                                     if let quantity = sample.quantity {
                                         let value = quantity.doubleValueForUnit(self.heartRateUnit)
+                                        self.heartBeatDuration = 60.0 / value;
                                         self.updateBPM(UInt16(value))
                                     }
                                     // retrieve source from sample
@@ -241,6 +251,31 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     func updateBPM(bpm: UInt16) {
         bpmLabel.text = String(bpm)
+        //        var completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        }
+    }
+    
+    func animateHeart() {
+        let animation:(() -> Void) = {
+            if (self.heartBeatDuration > 0.0) {
+                var newHeartRect = self.origHeartRect
+                if (!self.heartIsSmall) {
+                    newHeartRect = CGRectInset(newHeartRect, 20, 20)
+                }
+                self.heartIsSmall = !self.heartIsSmall
+                self.heartImageView.frame = newHeartRect
+            }
+        }
+        let completion:((Bool) -> Void) = { (Bool finished) in
+            //println("animation complete")
+            self.animateHeart()
+        }
+        UIView.animateWithDuration(heartBeatDuration/2.0, animations: animation, completion: completion)
     }
     
     // MARK: BTDeviceManagerDelegate
