@@ -174,13 +174,13 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                     let sortDescriptors = NSArray(object: endDate)
                     // build up sampple query
                     let sampleQuery = HKSampleQuery(sampleType: heartRateType, predicate: nil, limit: 1, sortDescriptors: sortDescriptors) { // trailing closure
-                        (query: HKSampleQuery!, object: AnyObject[]!, error: NSError!) in
+                        (query: HKSampleQuery!, objects: AnyObject[]!, error: NSError!) in
                         if (error) {
                             println("sample query returned error = \(error)")
-                        } else {
+                        } else if (objects.count > 0) {
                             // we are assume if the query succeeded that we got a value, not sure if this assumption
                             // is valid considering there is no documentation
-                            let sample = object[0] as HKQuantitySample
+                            let sample = objects[0] as HKQuantitySample
                             println("sample = \(sample)")
                             // ignore old samples
                             let startDate = sample.startDate;
@@ -207,6 +207,8 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                                     }
                                 }
                             }
+                        } else {
+                            println("got no samples back")
                         }
                     }
                     myHealthStore.executeQuery(sampleQuery)
@@ -275,7 +277,6 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
             //println("animation complete")
             self.animateHeart()
         }
-        let duration = heartBeatDuration == 0.0 ? 0.5 : (heartBeatDuration/2.0)
         UIView.animateWithDuration(heartBeatDuration/2.0, animations: animation, completion: completion)
     }
     
@@ -329,6 +330,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
             }
         } else {
             bpmLabel.text = String(bpm)
+            self.heartBeatDuration = 60.0 / Double(bpm);
         }
      }
     
