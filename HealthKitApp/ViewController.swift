@@ -14,6 +14,15 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     let minTimeBetweenReadings: NSTimeInterval = 0.200  // value to debounce repeated readings from BT device
     let oldReadingTime: NSTimeInterval = 30             // readings older than this are discarded
     let heartRateUnit = HKUnit(fromString: "count/min") // or HKUnit.countUnit().unitDividedByUnit(HKUnit.minuteUnit())
+    let bloodGlucoseUnit = HKUnit(fromString: "mg/dL") // or HKUnit.countUnit().unitDividedByUnit(HKUnit.minuteUnit())
+    // blood glucose metadata meal
+    let myHKMetadataKeyBloodGlucoseWhen = "com.tedmrogers.HealthKitApp.When"
+    let myHKMetadataValueBloodGlucoseWhenMorning = "Morning"
+    let myHKMetadataValueBloodGlucoseWhenPreMeal = "Pre-Meal"
+    let myHKMetadataValueBloodGlucoseWhenPostMeal = "Post-Meal"
+    let myHKMetadataValueBloodGlucoseWhenNight = "Night"
+    // blood glucose metadata notes
+    let myHKMetadataKeyBloodGlucoseNotes = "com.tedmrogers.HealthKitApp.Notes"
     
     // MARK: properties
     // the bluetooth device manager object
@@ -147,13 +156,19 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     func dataTypesToWrite() -> NSSet {
         let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
-        let types = NSSet(object: heartRateType)
+        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
+        // make an NSSEt using an Array
+        //let dataTypes:AnyObject[] = [ heartRateType, bloodGlucoseType ]
+        //let types = NSSet(array: dataTypes)
+        // make an NSSEt using a C Array
+        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
         return types;
     }
     
     func dataTypesToRead() -> NSSet {
         let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
-        let types = NSSet(object: heartRateType)
+        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
+        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
         return types;
     }
 
@@ -217,7 +232,34 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
             myHealthStore.executeQuery(query)
         }
     }
-        
+    
+    func addBloodGlucoseReading(when: String!, notes: String!, reading: Double) {
+        // check for presence of HealthKit with optional binding statement
+        if let myHealthStore = healthStore {
+            let now = NSDate()
+            let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
+            let bloodGlucoseQuantity = HKQuantity(unit: bloodGlucoseUnit, doubleValue: reading)
+            let location = NSNumber(integer: deviceSensorLocation.toRaw())
+            var meta = NSMutableDictionary()
+            if (when) {
+                meta.setValue(when, forKey: myHKMetadataKeyBloodGlucoseWhen)
+            }
+            if (notes) {
+                meta.setValue(notes, forKey: myHKMetadataKeyBloodGlucoseNotes)
+            }
+            
+            let bloodGlucoseSample = HKQuantitySample(type: bloodGlucoseType, quantity: bloodGlucoseQuantity, startDate: now, endDate: now, metadata: meta)
+            
+            myHealthStore.saveObject(bloodGlucoseSample) { (success: Bool, error: NSError!) -> Void in
+                if (success) {
+                    println("successfully saved blood glucose reading to HealthKit")
+                } else if (error) {
+                    println("error saving blood glucose reading to HealthKit = \(error)")
+                }
+            }
+        }
+    }
+    
     func updateDeviceName(deviceName: String) {
         if (deviceName != deviceLabel.text){
             deviceLabel.text = deviceName;
@@ -336,8 +378,10 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     // MARK: Action Handlers
     
+    //_deviceManager.startScan()
+    
     @IBAction func scanClicked(sender : AnyObject) {
-        _deviceManager.startScan()
+        addBloodGlucoseReading(myHKMetadataValueBloodGlucoseWhenPostMeal, notes: nil, reading: 84)
     }
     
     @IBAction func findClicked(sender : AnyObject) {
