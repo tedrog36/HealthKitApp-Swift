@@ -1,36 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6154.21" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="DVH-8g-GbV">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6154.21" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BUe-Gy-A1t">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6153.13"/>
     </dependencies>
     <scenes>
-        <!--Navigation Controller-->
-        <scene sceneID="hl3-rX-7ga">
-            <objects>
-                <navigationController navigationBarHidden="YES" id="DVH-8g-GbV" sceneMemberID="viewController">
-                    <extendedEdge key="edgesForExtendedLayout"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="YEt-sv-u8y">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <connections>
-                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="rootViewController" id="iBV-gn-qUa"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="e0B-XA-GRt" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-928" y="108"/>
-        </scene>
-        <!--View Controller-->
+        <!--Heart Rate-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModule="HealthKitApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="vXZ-lx-hvc" userLabel="Heart Rate" customClass="ViewController" customModule="HealthKitApp" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
-                        <rect key="frame" x="0.0" y="64" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Device:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6H-qn-2cZ">
@@ -126,7 +109,7 @@
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <navigationItem key="navigationItem" id="KFs-Z6-oUY"/>
+                    <tabBarItem key="tabBarItem" title="Heart" image="heart.png" id="pag-em-C3b"/>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
@@ -139,10 +122,91 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-368" y="168"/>
+            <point key="canvasLocation" x="-848" y="-195"/>
+        </scene>
+        <!--Blood Glucose-->
+        <scene sceneID="fT6-J7-dre">
+            <objects>
+                <viewController id="33q-Hf-8KA" userLabel="Blood Glucose" customClass="BloodGlucoseViewController" customModule="HealthKitApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="abw-hQ-yXC"/>
+                        <viewControllerLayoutGuide type="bottom" id="47Q-Xh-8z2"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Ayc-mi-0I5">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="431"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="pR4-On-lpT">
+                                <rect key="frame" x="0.0" y="64" width="320" height="367"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="33q-Hf-8KA" id="3nV-Eb-MaQ"/>
+                                    <outlet property="delegate" destination="33q-Hf-8KA" id="ddJ-dX-Xkl"/>
+                                </connections>
+                            </tableView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Dse-Si-Ncp">
+                                <rect key="frame" x="0.0" y="20" width="320" height="44"/>
+                                <items>
+                                    <barButtonItem width="27" systemItem="fixedSpace" id="6aV-C3-JWv"/>
+                                    <barButtonItem systemItem="flexibleSpace" id="7iz-uy-ak6"/>
+                                    <barButtonItem title="Blood Glucose" id="sxR-2q-EVb"/>
+                                    <barButtonItem systemItem="flexibleSpace" id="rlb-Q4-XgO"/>
+                                    <barButtonItem systemItem="add" id="pfH-An-Xc6">
+                                        <connections>
+                                            <action selector="clickedAdd:" destination="33q-Hf-8KA" id="NDZ-4d-pLT"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Dse-Si-Ncp" firstAttribute="leading" secondItem="Ayc-mi-0I5" secondAttribute="leading" id="80Q-bY-k91"/>
+                            <constraint firstItem="Dse-Si-Ncp" firstAttribute="leading" secondItem="pR4-On-lpT" secondAttribute="leading" id="M0R-2X-8Nb"/>
+                            <constraint firstItem="Dse-Si-Ncp" firstAttribute="top" secondItem="abw-hQ-yXC" secondAttribute="bottom" id="S6p-hW-QsJ"/>
+                            <constraint firstItem="pR4-On-lpT" firstAttribute="top" secondItem="Dse-Si-Ncp" secondAttribute="bottom" id="VEI-Pe-Cie"/>
+                            <constraint firstAttribute="trailing" secondItem="Dse-Si-Ncp" secondAttribute="trailing" id="oqy-CD-DTK"/>
+                            <constraint firstItem="Dse-Si-Ncp" firstAttribute="trailing" secondItem="pR4-On-lpT" secondAttribute="trailing" id="v4M-vU-jBp"/>
+                            <constraint firstItem="47Q-Xh-8z2" firstAttribute="top" secondItem="pR4-On-lpT" secondAttribute="bottom" id="vk5-Nl-q1S"/>
+                        </constraints>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <tabBarItem key="tabBarItem" title="Item" image="blood-drop.png" id="7SZ-9U-ioh"/>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Blood Glucose" id="PsW-cH-xXf"/>
+                    <connections>
+                        <outlet property="tableView" destination="pR4-On-lpT" id="UR5-Ee-Gwo"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="h6y-h8-q5y" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-929" y="393"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="ShI-nL-FXg">
+            <objects>
+                <tabBarController id="BUe-Gy-A1t" customClass="HKTabBarController" customModule="HealthKitApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="aab-wB-u7b">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="viewControllers" id="wj2-8z-2WL"/>
+                        <segue destination="33q-Hf-8KA" kind="relationship" relationship="viewControllers" id="pT5-pE-ohV"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="W2W-YK-bgD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1322" y="-59"/>
         </scene>
     </scenes>
     <resources>
         <image name="Beating-heart.png" width="507" height="463"/>
+        <image name="blood-drop.png" width="18" height="30"/>
+        <image name="heart.png" width="30" height="28"/>
     </resources>
 </document>

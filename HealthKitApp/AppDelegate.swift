@@ -11,10 +11,19 @@ import HealthKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-                            
+    
+    // delay for initing HealthKit after all view controllers are constructed
+    let kInitHealthKitDelay = 0.5
+    // the app main window
     var window: UIWindow?
+    // the health store - can be null if we don't get permission
+    var healthStore: HKHealthStore?         // optional
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: NSDictionary?) -> Bool {        
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: NSDictionary?) -> Bool {
+        // dispatch immediately after current block
+        dispatch_async(dispatch_get_main_queue()) {
+            self.requestHealthKitSharing()
+        }
         return true
     }
 
@@ -38,6 +47,109 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+    func requestHealthKitSharing() {
+        // make sure HealthKit is available on this device
+        if (!HKHealthStore.isHealthDataAvailable()) {
+            return
+        }
+        // get our types to read and write for sharing permissions
+        let typesToWrite = dataTypesToWrite()
+        let typesToRead = dataTypesToRead()
+        // create our health store
+        let myHealthStore = HKHealthStore()
+        
+        // illustrate a few ways of handling the closure
+        // maximum verbosity
+        // request permissions to share health data with HealthKit
+        println("requesting authorization to share health data types")
+        myHealthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
+            (success: Bool, error: NSError!) -> Void in
+            if success {
+                println("successfully registered to share types")
+                // all is good, so save our HealthStore and do some initialization
+                self.healthStore = myHealthStore
+                NSNotificationCenter.defaultCenter().postNotificationName(Constants.kHealthKitInitialized, object: self)
+                //self.initHealthKit()
+            } else if (error) {
+                println("error regisering shared types = \(error)")
+            }
+        })
+        
+        //        // drop return type
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
+        //            (success: Bool, error: NSError!) in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        })
+        //
+        //        // drop parameter types
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
+        //            (success, error) in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        })
+        //
+        //        // switch to trailing closure - you can do this if the last param is a closure
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success: Bool, error: NSError!) -> Void in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        }
+        //
+        //        // trailing closue with no return type and no param types
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success, error) in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        }
+        //        // trailing closue with no return type and no params
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) {
+        //            if $0 {
+        //                println("successfully registered to share types")
+        //            } else if ($1) {
+        //                println("error regisering shared types = \($1)")
+        //            }
+        //        }
+        //
+        //        // create a variable to hold the closure
+        //        let completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
+        //            if success {
+        //                println("successfully registered to share types")
+        //            } else if (error) {
+        //                println("error regisering shared types = \(error)")
+        //            }
+        //        }
+        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: completion)
+    }
+    
+    func dataTypesToWrite() -> NSSet {
+        let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
+        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
+        // make an NSSEt using an Array
+        //let dataTypes:AnyObject[] = [ heartRateType, bloodGlucoseType ]
+        //let types = NSSet(array: dataTypes)
+        // make an NSSEt using a C Array
+        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
+        return types;
+    }
+    
+    func dataTypesToRead() -> NSSet {
+        let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
+        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
+        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
+        return types;
     }
 }
 

@@ -14,21 +14,10 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     let minTimeBetweenReadings: NSTimeInterval = 0.200  // value to debounce repeated readings from BT device
     let oldReadingTime: NSTimeInterval = 30             // readings older than this are discarded
     let heartRateUnit = HKUnit(fromString: "count/min") // or HKUnit.countUnit().unitDividedByUnit(HKUnit.minuteUnit())
-    let bloodGlucoseUnit = HKUnit(fromString: "mg/dL") // or HKUnit.countUnit().unitDividedByUnit(HKUnit.minuteUnit())
-    // blood glucose metadata meal
-    let myHKMetadataKeyBloodGlucoseWhen = "com.tedmrogers.HealthKitApp.When"
-    let myHKMetadataValueBloodGlucoseWhenMorning = "Morning"
-    let myHKMetadataValueBloodGlucoseWhenPreMeal = "Pre-Meal"
-    let myHKMetadataValueBloodGlucoseWhenPostMeal = "Post-Meal"
-    let myHKMetadataValueBloodGlucoseWhenNight = "Night"
-    // blood glucose metadata notes
-    let myHKMetadataKeyBloodGlucoseNotes = "com.tedmrogers.HealthKitApp.Notes"
     
     // MARK: properties
     // the bluetooth device manager object
     var _deviceManager: BTDeviceManager!    // implicitly unwrapped optional
-    // the health store - can be null if we don't get permission
-    var healthStore: HKHealthStore?         // optional
     // track time of last reading.  My heart rate monitor is providing two readings back to back
     // so this is the drop one on the floor
     var lastReadingTime: NSDate = NSDate.distantPast() as NSDate
@@ -58,9 +47,20 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
         // init the Bluetooth device manager
         _deviceManager = BTDeviceManager()
         _deviceManager.delegate = self
-        // get HealthKit up and running
-        requestHealthKitSharing()
-        animateHeart()
+        let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        if let myHealthStore = appDelegate.healthStore {
+            self.initHealthKit()
+            self.animateHeart()
+        } else {
+            // wait for notifiication that HealthKit is ready
+            NSNotificationCenter.defaultCenter().addObserverForName(Constants.kHealthKitInitialized, object: nil, queue: nil) { (notif: NSNotification!) -> Void in
+                // make no assumptions about current queue
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.initHealthKit()
+                    self.animateHeart()
+                }
+            }
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -70,111 +70,10 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
 
     // MARK: Implementation
     
-    func requestHealthKitSharing() {
-        // make sure HealthKit is available on this device
-        if (!HKHealthStore.isHealthDataAvailable()) {
-            return
-        }
-        // get our types to read and write for sharing permissions
-        let typesToWrite = dataTypesToWrite()
-        let typesToRead = dataTypesToRead()
-        // create our health store
-        let myHealthStore = HKHealthStore()
-        
-        // illustrate a few ways of handling the closure
-        // maximum verbosity
-        // request permissions to share health data with HealthKit
-        println("requesting authorization to share health data types")
-        myHealthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
-            (success: Bool, error: NSError!) -> Void in
-            if success {
-                println("successfully registered to share types")
-                // all is good, so save our HealthStore and do some initialization
-                self.healthStore = myHealthStore
-                self.initHealthKit()
-            } else if (error) {
-                println("error regisering shared types = \(error)")
-            }
-        })
-        
-//        // drop return type
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
-//            (success: Bool, error: NSError!) in
-//            if success {
-//                println("successfully registered to share types")
-//            } else if (error) {
-//                println("error regisering shared types = \(error)")
-//            }
-//        })
-//
-//        // drop parameter types
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
-//            (success, error) in
-//            if success {
-//                println("successfully registered to share types")
-//            } else if (error) {
-//                println("error regisering shared types = \(error)")
-//            }
-//        })
-//
-//        // switch to trailing closure - you can do this if the last param is a closure
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success: Bool, error: NSError!) -> Void in
-//            if success {
-//                println("successfully registered to share types")
-//            } else if (error) {
-//                println("error regisering shared types = \(error)")
-//            }
-//        }
-//
-//        // trailing closue with no return type and no param types
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success, error) in
-//            if success {
-//                println("successfully registered to share types")
-//            } else if (error) {
-//                println("error regisering shared types = \(error)")
-//            }
-//        }
-//        // trailing closue with no return type and no params
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) {
-//            if $0 {
-//                println("successfully registered to share types")
-//            } else if ($1) {
-//                println("error regisering shared types = \($1)")
-//            }
-//        }
-//
-//        // create a variable to hold the closure
-//        let completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
-//            if success {
-//                println("successfully registered to share types")
-//            } else if (error) {
-//                println("error regisering shared types = \(error)")
-//            }
-//        }
-//        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: completion)
-    }
-    
-    func dataTypesToWrite() -> NSSet {
-        let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
-        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
-        // make an NSSEt using an Array
-        //let dataTypes:AnyObject[] = [ heartRateType, bloodGlucoseType ]
-        //let types = NSSet(array: dataTypes)
-        // make an NSSEt using a C Array
-        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
-        return types;
-    }
-    
-    func dataTypesToRead() -> NSSet {
-        let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
-        let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
-        let types = NSSet(objects: [heartRateType, bloodGlucoseType], count: 2)
-        return types;
-    }
-
     func initHealthKit() {
         // check for presence of HealthKit with optional binding statement
-        if let myHealthStore = healthStore {
+        let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        if let myHealthStore = appDelegate.healthStore {
             // get heart rate quantity type
             let heartRateType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeartRate)
             // put together a query that will call closure when heart rate value has been updated
@@ -230,33 +129,6 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                 }
             }
             myHealthStore.executeQuery(query)
-        }
-    }
-    
-    func addBloodGlucoseReading(when: String!, notes: String!, reading: Double) {
-        // check for presence of HealthKit with optional binding statement
-        if let myHealthStore = healthStore {
-            let now = NSDate()
-            let bloodGlucoseType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)
-            let bloodGlucoseQuantity = HKQuantity(unit: bloodGlucoseUnit, doubleValue: reading)
-            let location = NSNumber(integer: deviceSensorLocation.toRaw())
-            var meta = NSMutableDictionary()
-            if (when) {
-                meta.setValue(when, forKey: myHKMetadataKeyBloodGlucoseWhen)
-            }
-            if (notes) {
-                meta.setValue(notes, forKey: myHKMetadataKeyBloodGlucoseNotes)
-            }
-            
-            let bloodGlucoseSample = HKQuantitySample(type: bloodGlucoseType, quantity: bloodGlucoseQuantity, startDate: now, endDate: now, metadata: meta)
-            
-            myHealthStore.saveObject(bloodGlucoseSample) { (success: Bool, error: NSError!) -> Void in
-                if (success) {
-                    println("successfully saved blood glucose reading to HealthKit")
-                } else if (error) {
-                    println("error saving blood glucose reading to HealthKit = \(error)")
-                }
-            }
         }
     }
     
@@ -349,7 +221,8 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     func newBPM(bpm: UInt16) {
         // check for presence of HealthKit with optional binding statement
-        if let myHealthStore = healthStore {
+        let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        if let myHealthStore = appDelegate.healthStore {
             // sometimes we get 2 readings in a row at the same time, debounce those
             let now = NSDate()
             let timeSinceLastReading = now.timeIntervalSinceDate(lastReadingTime)
@@ -378,10 +251,8 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     
     // MARK: Action Handlers
     
-    //_deviceManager.startScan()
-    
     @IBAction func scanClicked(sender : AnyObject) {
-        addBloodGlucoseReading(myHKMetadataValueBloodGlucoseWhenPostMeal, notes: nil, reading: 84)
+        _deviceManager.startScan()
     }
     
     @IBAction func findClicked(sender : AnyObject) {
