@@ -171,7 +171,7 @@
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <tabBarItem key="tabBarItem" title="Item" image="blood-drop.png" id="7SZ-9U-ioh"/>
+                    <tabBarItem key="tabBarItem" title="Glucose" image="blood-drop.png" id="7SZ-9U-ioh"/>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Blood Glucose" id="PsW-cH-xXf"/>
                     <connections>
