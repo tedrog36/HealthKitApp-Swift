@@ -10,6 +10,6 @@ import UIKit
 
 class HKTabBarController: UITabBarController {
     override func viewDidLoad() {
-        tabBar.tintColor = UIColor.redColor()
+        tabBar.tintColor = UIColor.red
     }
 }
