@@ -25,28 +25,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-    
     func requestHealthKitSharing() {
         // make sure HealthKit is available on this device
         if !HKHealthStore.isHealthDataAvailable() {
@@ -58,78 +36,92 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // create our health store
         let myHealthStore = HKHealthStore()
         
-        // illustrate a few ways of handling the closure
-        // maximum verbosity
-        // request permissions to share health data with HealthKit
         print("requesting authorization to share health data types")
-        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead) { (success: Bool, error: Error?) in
+        // illustrate a few ways of handling the closure
+        // start with class trailing closure
+        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead) { (success, error) in
             if success {
-                print("successfully registered to share types")
-                // all is good, so save our HealthStore and do some initialization
-                self.healthStore = myHealthStore
-                NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: self)
-                //self.initHealthKit()
-            } else if let theError = error {
-                print("error regisering shared types = \(theError)")
+                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+            } else {
+                self.handleAuthorizationFailure(error: error)
             }
-        
         }
-        
-        //        // drop return type
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
-        //            (success: Bool, error: NSError!) in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        })
-        //
-        //        // drop parameter types
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: {
-        //            (success, error) in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        })
-        //
-        //        // switch to trailing closure - you can do this if the last param is a closure
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success: Bool, error: NSError!) -> Void in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        }
-        //
-        //        // trailing closue with no return type and no param types
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) { (success, error) in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        }
-        //        // trailing closue with no return type and no params
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead) {
-        //            if $0 {
-        //                println("successfully registered to share types")
-        //            } else if ($1) {
-        //                println("error regisering shared types = \($1)")
-        //            }
-        //        }
-        //
-        //        // create a variable to hold the closure
-        //        let completion:((success: Bool, error: NSError!) -> Void) = { (success: Bool, error: NSError!) in
-        //            if success {
-        //                println("successfully registered to share types")
-        //            } else if (error) {
-        //                println("error regisering shared types = \(error)")
-        //            }
-        //        }
-        //        healthStore.requestAuthorizationToShareTypes(typesToWrite, readTypes: typesToRead, completion: completion)
+
+//        // maximum verbosity
+//        // request permissions to share health data with HealthKit
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead, completion: {
+//            (success: Bool, error: Error?) -> Void in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        })
+//        // drop parameter types
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead, completion: {
+//            (success, error) -> Void in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        })
+//        // drop return
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead, completion: {
+//            (success, error) in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        })
+//        // switch to trailing closure - you can do this if the last param is a closure
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead) { (success: Bool, error: Error?) -> Void in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        }
+//        // trailing closue with no return type and no param types
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead) { (success, error) in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        }
+//        // trailing closue with no return type and no params
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead) {
+//            if $0 {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: $1)
+//            }
+//        }
+//        // create a variable to hold the closure
+//        let completion = {
+//            (success: Bool, error: Error?) -> Void in
+//            if success {
+//                self.handleAuthorizationSuccess(healthStore: myHealthStore)
+//            } else {
+//                self.handleAuthorizationFailure(error: error)
+//            }
+//        }
+//        myHealthStore.requestAuthorization(toShare: typesToWrite, read: typesToRead, completion: completion)
+    }
+    
+    func handleAuthorizationSuccess(healthStore: HKHealthStore) {
+        print("successfully registered to share types")
+        // all is good, so save our HealthStore and do some initialization
+        self.healthStore = healthStore
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: self)
+    }
+    
+    func handleAuthorizationFailure(error: Error?) {
+        if let theError = error {
+            print("error regisering shared types = \(theError)")
+        }
     }
     
     func dataTypesToWrite() -> Set<HKQuantityType> {
