@@ -9,7 +9,7 @@
 import UIKit
 import HealthKit
 
-class ViewController: UIViewController, BTDeviceManagerDelegate {
+class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
     // MARK: Contants
     let minTimeBetweenReadings: TimeInterval = 0.200  // value to debounce repeated readings from BT device
     let oldReadingTime: TimeInterval = 30             // readings older than this are discarded
@@ -47,7 +47,7 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
         // init the Bluetooth device manager
         deviceManager = BTDeviceManager()
         deviceManager.delegate = self
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate // forced type cast
         // check for presence of HealthKit with optional binding statement
         if let healthStore = appDelegate.healthStore {
             self.initHealthKit(healthStore: healthStore)
@@ -83,16 +83,14 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                 print("observer query returned error = \(theError.localizedDescription)")
             } else {
                 // now let's go get the latest heart rate sample - use the end date and get in reverse chronological order
-                let endDate = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-                let sortDescriptors = [endDate]
+                let endDateSortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+                let sortDescriptors = [endDateSortDescriptor]
                 // build up sampple query
                 let sampleQuery = HKSampleQuery(sampleType: heartRateType, predicate: nil, limit: 1, sortDescriptors: sortDescriptors, resultsHandler: {
                     (query: HKSampleQuery, querySamples:[HKSample]?, error: Error?) in
                     if let theError = error {
                         print("sample query returned error = \(theError)")
                     } else if let samples = querySamples, samples.count > 0 {
-                        // we are assume if the query succeeded that we got a value, not sure if this assumption
-                        // is valid considering there is no documentation
                         let sample = samples[0] as! HKQuantitySample
                         print("sample = \(sample)")
                         // ignore old samples
@@ -102,10 +100,10 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
                                 let value = sample.quantity.doubleValue(for: self.heartRateUnit)
                                 self.heartBeatDuration = 60.0 / value;
                                 self.updateBPM(UInt16(value))
-                                // retrieve source from sample
-                                if !sample.sourceRevision.source.name.isEmpty {
-                                    self.updateDeviceName(sample.sourceRevision.source.name)
-                                }
+//                                // retrieve source from sample
+//                                if !sample.sourceRevision.source.name.isEmpty {
+//                                    self.updateDeviceName(sample.sourceRevision.source.name)
+//                                }
                                 // retrieve meta data from sample - sensor location
                                 if let metadata = sample.metadata {
                                     if let location = metadata[HKMetadataKeyHeartRateSensorLocation] as? NSNumber {
@@ -164,27 +162,27 @@ class ViewController: UIViewController, BTDeviceManagerDelegate {
     // This method is called once and the expectation is that it will
     // keep calling itself forever
     func animateHeart() {
-        if (heartBeatDuration == 0.0) {
-            // nothing happening, so check later in half a second
-            heartImageView.frame = origHeartRect
-            updateBPM(0)
-            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(ViewController.animateHeart), userInfo: nil, repeats: false)
-            return;
-        }
-        // animate the heart
-        let animation:(() -> Void) = {
-            var newHeartRect = self.origHeartRect
-            if (!self.heartIsSmall) {
-                newHeartRect = newHeartRect?.insetBy(dx: 20, dy: 20)
-            }
-            self.heartIsSmall = !self.heartIsSmall
-            self.heartImageView.frame = newHeartRect!
-        }
-        let completion:((Bool) -> Void) = { (finished) in
-            //println("animation complete")
-            self.animateHeart()
-        }
-        UIView.animate(withDuration: heartBeatDuration/2.0, animations: animation, completion: completion)
+//        if (heartBeatDuration == 0.0) {
+//            // nothing happening, so check later in half a second
+//            heartImageView.frame = origHeartRect
+//            updateBPM(0)
+//            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(HeartRateViewController.animateHeart), userInfo: nil, repeats: false)
+//            return;
+//        }
+//        // animate the heart
+//        let animation:(() -> Void) = {
+//            var newHeartRect = self.origHeartRect
+//            if (!self.heartIsSmall) {
+//                newHeartRect = newHeartRect?.insetBy(dx: 20, dy: 20)
+//            }
+//            self.heartIsSmall = !self.heartIsSmall
+//            self.heartImageView.frame = newHeartRect!
+//        }
+//        let completion:((Bool) -> Void) = { (finished) in
+//            //println("animation complete")
+//            self.animateHeart()
+//        }
+//        UIView.animate(withDuration: heartBeatDuration/2.0, animations: animation, completion: completion)
     }
     
     // MARK: BTDeviceManagerDelegate

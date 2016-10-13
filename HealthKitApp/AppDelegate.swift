@@ -12,8 +12,6 @@ import HealthKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-    // delay for initing HealthKit after all view controllers are constructed
-    let kInitHealthKitDelay = 0.5
     // the app main window
     var window: UIWindow?
     // the health store - can be null if we don't get permission
