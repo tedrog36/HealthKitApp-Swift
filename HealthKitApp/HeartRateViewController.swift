@@ -55,11 +55,8 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         } else {
             // wait for notifiication that HealthKit is ready
             NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: nil, queue: nil) { (notif: Notification!) -> Void in
-                // make no assumptions about current queue
-                DispatchQueue.main.async {
-                    self.initHealthKit(healthStore: appDelegate.healthStore!)
-                    self.animateHeart()
-                }
+                self.initHealthKit(healthStore: appDelegate.healthStore!)  // force unwrap becuase it must exist
+                self.animateHeart()
             }
         }
     }

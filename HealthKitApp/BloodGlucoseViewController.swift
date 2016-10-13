@@ -11,15 +11,16 @@ import HealthKit
 
 class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     let bloodGlucoseUnitString = "mg/dL"
-    let bloodGlucoseUnit = HKUnit(from: "mg/dL") // or HKUnit.countUnit().unitDividedByUnit(HKUnit.minuteUnit())
+    let bloodGlucoseUnit : HKUnit
+    let maxSamples = 200
     // blood glucose metadata meal
-    let myHKMetadataKeyBloodGlucoseWhen = "com.tedmrogers.HealthKitApp.When"
+    let myHKMetadataKeyBloodGlucoseWhen : String
     let myHKMetadataValueBloodGlucoseWhenMorning = "Morning"
     let myHKMetadataValueBloodGlucoseWhenPreMeal = "Pre-Meal"
     let myHKMetadataValueBloodGlucoseWhenPostMeal = "Post-Meal"
     let myHKMetadataValueBloodGlucoseWhenNight = "Night"
     // blood glucose metadata notes
-    let myHKMetadataKeyBloodGlucoseNotes = "com.tedmrogers.HealthKitApp.Notes"
+    let myHKMetadataKeyBloodGlucoseNotes : String
     let kBloodGlucoseCellIdentifier = "BloodGlucoseIdentifier"
 
     // the list of glucose samples
@@ -29,35 +30,36 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
     // MARK: Outlets
     @IBOutlet var tableView: UITableView!
     
+    required init?(coder aDecoder: NSCoder) {
+        bloodGlucoseUnit = HKUnit(from: bloodGlucoseUnitString)
+        let bundleId = Bundle.main.bundleIdentifier!; // why is this optional? (we force unwrap it)
+        myHKMetadataKeyBloodGlucoseWhen = "\(bundleId).When"
+        myHKMetadataKeyBloodGlucoseNotes = "\(bundleId).Notes"
+        super.init(coder: aDecoder)
+    }
+    
     override func viewDidLoad() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate  // forced downcast, has to be AppDelegate
         // check for presence of HealthKit with optional binding statement
         if let healthStore = appDelegate.healthStore {
             self.initHealthKit(healthStore: healthStore)
         } else {
             // wait for notifiication that HealthKit is ready
             NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: nil, queue: nil) { (notif: Notification!) -> Void in
-                // make no assumptions about current queue
-                DispatchQueue.main.async {
-                    self.initHealthKit(healthStore: appDelegate.healthStore!)
-                }
+                self.initHealthKit(healthStore: appDelegate.healthStore!) // force unwrap becuase it must exist
             }
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        print("tableView height = \(tableView.frame.height)")
     }
     
     // MARK: Implementation
     
     func initHealthKit(healthStore: HKHealthStore) {
         // now let's go get the latest heart rate sample - use the end date and get in reverse chronological order
-        let endDate = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-        let sortDescriptors = [endDate]
+        let endDateSortIdentifier = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        let sortDescriptors = [endDateSortIdentifier]
         let bloodGlucoseType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)
         // build up sampple query
-        let sampleQuery = HKSampleQuery(sampleType: bloodGlucoseType!, predicate: nil, limit: Int(HKObjectQueryNoLimit), sortDescriptors: sortDescriptors) { // trailing closure
+        let sampleQuery = HKSampleQuery(sampleType: bloodGlucoseType!, predicate: nil, limit: maxSamples, sortDescriptors: sortDescriptors) { // trailing closure
             (query: HKSampleQuery, querySamples: [HKSample]?, error: Error?) in
             if let myError = error {
                 print("sample query returned error = \(myError)")
@@ -91,7 +93,7 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
             let bloodGlucoseSample = HKQuantitySample(type: bloodGlucoseType!, quantity: bloodGlucoseQuantity, start: now, end: now, metadata: meta)
             
             healthStore.save(bloodGlucoseSample) {
-                (success: Bool, error: Error?) in
+                (success, error) in
                 if success {
                     print("successfully saved blood glucose reading to HealthKit")
                 } else if let theError = error {
@@ -101,8 +103,9 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
                     if self.bloodGlucoseSamples == nil {
                         self.bloodGlucoseSamples = []
                     }
-                    self.bloodGlucoseSamples?.insert(bloodGlucoseSample, at: 0)
-                    print("bloodGlucoseSamples = \(self.bloodGlucoseSamples?.count)")
+                    // we can force unwrap because we are guaranteeing it is not nil
+                    self.bloodGlucoseSamples!.insert(bloodGlucoseSample, at: 0)
+                    print("bloodGlucoseSamples = \(self.bloodGlucoseSamples!.count)")
                     self.tableView.reloadData()
                 }
             }
@@ -116,23 +119,20 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        var rows = 0;
-        if let samples = bloodGlucoseSamples {
-            rows = samples.count
-        }
+        let rows = bloodGlucoseSamples?.count ?? 0;  // use optional chaining and Nil coalescing
         return rows
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let row = indexPath.row
-        let cell = tableView.dequeueReusableCell(withIdentifier: kBloodGlucoseCellIdentifier) ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: kBloodGlucoseCellIdentifier)
+        let cell = tableView.dequeueReusableCell(withIdentifier: kBloodGlucoseCellIdentifier) ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: kBloodGlucoseCellIdentifier) // love that nil coalescing!
 
-        // we shouldn't get here unless _bloodGlucoseSamples is valid so "force" unwrap
+        // we shouldn't get here unless _bloodGlucoseSamples is valid so "force" unwrap and force downcast
         let sample = bloodGlucoseSamples![row] as! HKQuantitySample
         
         var valueText = ""
         var whenText = ""
-        // retreve value from sample
+        // retreve value from sample - use integer part only
         let value = Int(sample.quantity.doubleValue(for: self.bloodGlucoseUnit))
         valueText = String(value) + bloodGlucoseUnitString
         // retrieve the start date
@@ -145,7 +145,7 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
                 whenText += " (\(when))"
             }
         }
-       // populate the cell
+        // populate the cell
         cell.textLabel?.text = valueText
         cell.detailTextLabel?.text = whenText
         
@@ -159,7 +159,7 @@ class BloodGlucoseViewController: UIViewController, UITableViewDelegate, UITable
     }
     
     // MARK: Action Handlers
-    
+
     @IBAction func clickedAdd(_ sender: AnyObject) {
         addBloodGlucoseReading(myHKMetadataValueBloodGlucoseWhenPostMeal, notes: nil, reading: 84)
     }

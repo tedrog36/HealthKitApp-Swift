@@ -114,8 +114,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func handleAuthorizationSuccess(healthStore: HKHealthStore) {
         print("successfully registered to share types")
         // all is good, so save our HealthStore and do some initialization
-        self.healthStore = healthStore
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: self)
+        DispatchQueue.main.async {
+            self.healthStore = healthStore
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: self)
+        }
     }
     
     func handleAuthorizationFailure(error: Error?) {
