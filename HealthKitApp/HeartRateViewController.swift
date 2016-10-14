@@ -155,6 +155,7 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
     // This method is called once and the expectation is that it will
     // keep calling itself forever
     func animateHeart() {
+//        print("heartBeatDuration = \(heartBeatDuration)")
         if (heartBeatDuration == 0.0) {
             // nothing happening, so check later in half a second
             heartImageView.frame = origHeartRect
@@ -164,12 +165,13 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         }
         // animate the heart
         let animation:(() -> Void) = {
-            var newHeartRect = self.origHeartRect
-            if (!self.heartIsSmall) {
-                newHeartRect = newHeartRect?.insetBy(dx: 20, dy: 20)
-            }
+            var newHeartRect = self.origHeartRect!   // in this case you must force unwrap the implicitly unwrapped optional
             self.heartIsSmall = !self.heartIsSmall
-            self.heartImageView.frame = newHeartRect!
+            if (self.heartIsSmall) {
+                newHeartRect = newHeartRect.insetBy(dx: 20, dy: 20)
+            }
+//             print("animtation to new size: w = \(newHeartRect.width) h = \(newHeartRect.height) heartIsSmall = \(self.heartIsSmall)")
+            self.heartImageView.frame = newHeartRect
         }
         let completion:((Bool) -> Void) = { (finished) in
             //println("animation complete")
