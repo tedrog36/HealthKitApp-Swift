@@ -1,15 +1,16 @@
 HealthKitApp-Swift
 ==================
 This is a sample application that communicates with a heart rate monitor via CoreBlueTooth and pushes heart rate
-information to HealthKit.  It doesn't required a connection to the heart rate monitor, it will retreive heart rate
-information from HealthKit to display if HK is paired with your heart rate monitor.
+information to HealthKit.  It doesn't require a connection to the heart rate monitor, it will retreive heart rate
+information from HealthKit to display if HK is paired with your heart rate monitor.  It also has some test functionality
+for pushing Blood Glucose readings to HealthKit.
 
 I wrote this app to learn Swift and provide examples for others as well as myself for various Swift language
 constructs.  Of course, I wanted to learn HealthKit as well.
 
 In this app you will find:
 
-1. Many examples of closures.  For one closure, in ViewController.swift, I provided 7 different closure solutions.
+1. Many examples of closures.  For one closure, in AppDelegate.swift, I provided 7 different closure solutions.
 
 2. Use of optionals - normal and implicitly unwrapped
 
