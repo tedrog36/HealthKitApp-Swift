@@ -27,6 +27,16 @@ extension CBCentralManager {
 
 class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
+    // heart rate monitor service uuid
+    let heartRateServiceUUID = CBUUID(string: "180D")
+    // heart rate measurement characteristic
+    let heartRateMeasurementCharacteristic = CBUUID(string: "2A37")
+    // sensor location characteristic
+    let sensorLocationCharacteristic = CBUUID(string: "2A38")
+    // heart rate control point characteristic
+    let heartRateControlPointCharacteristic = CBUUID(string: "2A39")
+    // device id key
+    let deviceIdKey = "MyDevice"
     // track whether bluetooth is currenty on
     var blueToothOn : Bool = false
     // current BT state
@@ -38,7 +48,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     // name of the central manager serial queue
     let centralManagerQueueName = "com.tedmrogers.centralmanagerqueue"
     // the heart rate monitor
-    var _heartRateMonitor : CBPeripheral?
+    var heartRateMonitor : CBPeripheral?
     // the callback delegate
     var delegate: BTDeviceManagerDelegate?
     
@@ -47,7 +57,10 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         // create the serial queue for the central manager to use
         centralManagerQueue = DispatchQueue(label: centralManagerQueueName, attributes: [])
         super.init()
-         // create the central manager with us as the delegate
+        // create the central manager with us as the delegate
+        // this is an example of a case where you would used an implicitly unwrapped optional
+        // because you cannot create the object without self and you cannot create self if you
+        // haven't defined all non-optionals
         centralManager = CBCentralManager(delegate: self, queue: centralManagerQueue)
     }
     
@@ -55,24 +68,22 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     
     // start scanning for devices (peripherals)
     func startScan() {
-        if (centralManager.centralManagerState == CBCentralManagerState.poweredOn) {
+        if centralManager.centralManagerState == CBCentralManagerState.poweredOn {
             print("Scanning")
-            let serviceUUID = CBUUID(string: "180D")
-            let serviceUUIDs = [serviceUUID];
+            let serviceUUIDs = [heartRateServiceUUID];
             centralManager.scanForPeripherals(withServices: serviceUUIDs, options: nil)
         }
     }
     
     // start scanning for devices (peripherals)
     func findDevice() {
-        if (centralManager.centralManagerState == CBCentralManagerState.poweredOn) {
+        if centralManager.centralManagerState == CBCentralManagerState.poweredOn {
             print("Finding")
-            if let deviceUUIDString = UserDefaults.standard.string(forKey: "MyDevice") {
+            if let deviceUUIDString = UserDefaults.standard.string(forKey: deviceIdKey) {
                 let deviceUUID = UUID(uuidString: deviceUUIDString)!
                 let deviceUUIDs = [deviceUUID];
                 let knownPeripherals = centralManager.retrievePeripherals(withIdentifiers: deviceUUIDs)
-                if (knownPeripherals.count > 0)
-                {
+                if knownPeripherals.count > 0 {
                     let peripheral = knownPeripherals[0] as CBPeripheral
                     connectToPeripheral(peripheral)
                 }
@@ -87,7 +98,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     
     // connect to the found periperal
     func connectToPeripheral(_ peripheral: CBPeripheral) {
-        _heartRateMonitor = peripheral;
+        heartRateMonitor = peripheral;
         centralManager.connect(peripheral, options: nil)
     }
     
@@ -100,25 +111,24 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         } else {
            // bpm = CFSwapInt16LittleToHost
         }
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async() {
             print("bpm = \(bpm) length = \(data.count)")
             if let delegate = self.delegate {
                 delegate.newBPM(bpm)
             }
-        })
+        }
     }
     
     // update the sensor location
     func updateWithLocationData(_ location: UInt8) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async() {
             if let delegate = self.delegate {
                 delegate.newLocation(Int(location))
             }
-        })
+        }
     }
     
     // MARK: CBCentralManagerDelegate
-    
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         blueToothOn = false;
@@ -137,11 +147,11 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         default:
             setState("Unknown.")
         }
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async() {
             if let delegate = self.delegate {
                 delegate.newBluetoothState(self.blueToothOn, blueToothState: self.blueToothState)
             }
-        })
+        }
     }
     
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
@@ -150,11 +160,11 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("\(#function)")
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async() {
             if let delegate = self.delegate {
                 delegate.deviceConnected(peripheral.name!)
             }
-        })
+        }
         // get the id of this peripheral
         let deviceId = peripheral.identifier
         print("deviceId = \(deviceId)")
@@ -162,12 +172,10 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         let deviceUUIDString = NSString(string: deviceId.uuidString)
         print("deviceUUIDString = \(deviceUUIDString)")
         let userDefaults = UserDefaults.standard
-        print("userDefaults = \(userDefaults)")
         userDefaults.set(deviceUUIDString, forKey: "MyDevice")
         userDefaults.synchronize()
         peripheral.delegate = self;
-        let serviceUUID = CBUUID(string: "180D")
-        let serviceUUIDs = [serviceUUID]
+        let serviceUUIDs = [heartRateServiceUUID]
         peripheral.discoverServices(serviceUUIDs)
     }
     
@@ -176,11 +184,11 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
             print("\(#function): error = \(theError.localizedDescription)")
             return
         }
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async() {
             if let delegate = self.delegate {
                 delegate.deviceDisconnected()
             }
-        })
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
@@ -206,7 +214,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     func centralManager(_ central: CBCentralManager!, didRetrievePeripherals peripherals: [AnyObject]!) {
         for peripheral in peripherals as! [CBPeripheral] {
             print("\(#function): peripheral = \(peripheral)")
-            if !(_heartRateMonitor != nil) {
+            if !(heartRateMonitor != nil) {
                 connectToPeripheral(peripheral)
                 break;
             }
@@ -235,17 +243,17 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         for characteristic in charcteristics {
 //            print("characteristic = \(characteristic) value = \(characteristic.value) UUID = \(characteristic.UUID) isNotifying = \(characteristic.isNotifying) isBroadcasted = \(characteristic.isBroadcasted)")
             // set notification for heart rate measurement
-            if characteristic.uuid.isEqual(CBUUID(string: "2A37")) {
+            if characteristic.uuid.isEqual(heartRateMeasurementCharacteristic) {
                 print("\(#function): Found a heart rate measurement characteristic")
                 peripheral.setNotifyValue(true, for: characteristic)
             }
             // read the body sensor location
-            if (characteristic.uuid.isEqual(CBUUID(string: "2A38"))) {
+            if characteristic.uuid.isEqual(sensorLocationCharacteristic) {
                 print("\(#function): Found a body sensor location characterstic")
                 peripheral.readValue(for: characteristic)
             }
             // write heart rate control point
-            if (characteristic.uuid.isEqual(CBUUID(string: "2A39"))) {
+            if characteristic.uuid.isEqual(heartRateControlPointCharacteristic) {
                 let valArray :[UInt8] = [1]
                 let valData = NSData(bytes: valArray, length: valArray.count)
                 peripheral.writeValue(valData as Data, for: characteristic, type: CBCharacteristicWriteType.withResponse)
@@ -274,14 +282,14 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         print("thread = \(Thread.current)")
 //        print("characteristic = \(characteristic) value = \(characteristic.value) UUID = \(characteristic.UUID) isNotifying = \(characteristic.isNotifying) isBroadcasted = \(characteristic.isBroadcasted)")
         // Updated heart rate measurment
-        if characteristic.uuid.isEqual(CBUUID(string: "2A37")) {
+        if characteristic.uuid.isEqual(heartRateMeasurementCharacteristic) {
             print("Updated heart rate measurement characteristic")
             if let data = characteristic.value {
                 updateWithHRMData(data)
             }
         } else
         // read the body sensor location
-        if (characteristic.uuid.isEqual(CBUUID(string: "2A38"))) {
+        if characteristic.uuid.isEqual(sensorLocationCharacteristic) {
             print("Updated body sensor location characterstic")
             if let data = characteristic.value {
                 if let location = data.first {
