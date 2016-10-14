@@ -38,5 +38,9 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>HealthKitApp would like to access your Health data to help you track your heart rate and entered glucose values.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>HealthKitApp would like to update your Health data to help you track your heart rate and entered glucose values.</string>
 </dict>
 </plist>

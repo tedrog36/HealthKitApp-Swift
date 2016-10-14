@@ -20,7 +20,7 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
     var deviceManager: BTDeviceManager!    // implicitly unwrapped optional
     // track time of last reading.  My heart rate monitor is providing two readings back to back
     // so this is the drop one on the floor
-    var lastReadingTime: Date = Date.distantPast as Date
+    var lastReadingTime = Date.distantPast
     // the device sensor location from the devcie mananger
     var deviceSensorLocation = HKHeartRateSensorLocation.other
     // the device sensor location returned from HealthKit
@@ -43,7 +43,6 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("viewDidLoad thread = \(Thread.current)")
-        origHeartRect = heartImageView.frame
         // init the Bluetooth device manager
         deviceManager = BTDeviceManager()
         deviceManager.delegate = self
@@ -51,19 +50,14 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         // check for presence of HealthKit with optional binding statement
         if let healthStore = appDelegate.healthStore {
             self.initHealthKit(healthStore: healthStore)
-            self.animateHeart()
+            self.startHeartAnimation()
         } else {
             // wait for notifiication that HealthKit is ready
             NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Constants.kHealthKitInitialized), object: nil, queue: nil) { (notif: Notification!) -> Void in
                 self.initHealthKit(healthStore: appDelegate.healthStore!)  // force unwrap becuase it must exist
-                self.animateHeart()
+                self.startHeartAnimation()
             }
         }
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     // MARK: Implementation
@@ -75,7 +69,6 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         }
         // put together a query that will call closure when heart rate value has been updated
         let query = HKObserverQuery(sampleType: heartRateType, predicate: nil) { (query: HKObserverQuery, handler: HKObserverQueryCompletionHandler, error: Error?) in
-            //println("\(__FUNCTION__) thread = \(NSThread.currentThread()) queue = \(dispatch_get_current_queue())")
             if let theError = error {
                 print("observer query returned error = \(theError.localizedDescription)")
             } else {
@@ -87,7 +80,7 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
                     (query: HKSampleQuery, querySamples:[HKSample]?, error: Error?) in
                     if let theError = error {
                         print("sample query returned error = \(theError)")
-                    } else if let samples = querySamples, samples.count > 0 {
+                    } else if let samples = querySamples, samples.count > 0 { // multi-clause condition
                         let sample = samples[0] as! HKQuantitySample
                         print("sample = \(sample)")
                         // ignore old samples
@@ -97,10 +90,6 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
                                 let value = sample.quantity.doubleValue(for: self.heartRateUnit)
                                 self.heartBeatDuration = 60.0 / value;
                                 self.updateBPM(UInt16(value))
-//                                // retrieve source from sample
-//                                if !sample.sourceRevision.source.name.isEmpty {
-//                                    self.updateDeviceName(sample.sourceRevision.source.name)
-//                                }
                                 // retrieve meta data from sample - sensor location
                                 if let metadata = sample.metadata {
                                     if let location = metadata[HKMetadataKeyHeartRateSensorLocation] as? NSNumber {
@@ -156,30 +145,37 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         bpmLabel.text = String(bpm)
     }
     
+    func startHeartAnimation() {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+2) {
+            self.origHeartRect = self.heartImageView.frame
+            self.animateHeart()
+        }
+    }
+    
     // This method is called once and the expectation is that it will
     // keep calling itself forever
     func animateHeart() {
-//        if (heartBeatDuration == 0.0) {
-//            // nothing happening, so check later in half a second
-//            heartImageView.frame = origHeartRect
-//            updateBPM(0)
-//            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(HeartRateViewController.animateHeart), userInfo: nil, repeats: false)
-//            return;
-//        }
-//        // animate the heart
-//        let animation:(() -> Void) = {
-//            var newHeartRect = self.origHeartRect
-//            if (!self.heartIsSmall) {
-//                newHeartRect = newHeartRect?.insetBy(dx: 20, dy: 20)
-//            }
-//            self.heartIsSmall = !self.heartIsSmall
-//            self.heartImageView.frame = newHeartRect!
-//        }
-//        let completion:((Bool) -> Void) = { (finished) in
-//            //println("animation complete")
-//            self.animateHeart()
-//        }
-//        UIView.animate(withDuration: heartBeatDuration/2.0, animations: animation, completion: completion)
+        if (heartBeatDuration == 0.0) {
+            // nothing happening, so check later in half a second
+            heartImageView.frame = origHeartRect
+            updateBPM(0)
+            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(HeartRateViewController.animateHeart), userInfo: nil, repeats: false)
+            return;
+        }
+        // animate the heart
+        let animation:(() -> Void) = {
+            var newHeartRect = self.origHeartRect
+            if (!self.heartIsSmall) {
+                newHeartRect = newHeartRect?.insetBy(dx: 20, dy: 20)
+            }
+            self.heartIsSmall = !self.heartIsSmall
+            self.heartImageView.frame = newHeartRect!
+        }
+        let completion:((Bool) -> Void) = { (finished) in
+            //println("animation complete")
+            self.animateHeart()
+        }
+        UIView.animate(withDuration: heartBeatDuration/2.0, animations: animation, completion: completion)
     }
     
     // MARK: BTDeviceManagerDelegate

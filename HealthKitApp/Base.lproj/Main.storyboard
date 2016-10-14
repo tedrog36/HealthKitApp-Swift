@@ -2,6 +2,8 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BUe-Gy-A1t">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -57,10 +59,9 @@
                                     <action selector="scanClicked:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="gNf-Qv-ChM"/>
                                 </connections>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Beating-heart.png" translatesAutoresizingMaskIntoConstraints="NO" id="VCj-Jw-EHs">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Beating-heart.png" translatesAutoresizingMaskIntoConstraints="NO" id="VCj-Jw-EHs">
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="259" id="8rx-Mq-THC"/>
-                                    <constraint firstAttribute="width" constant="280" id="uO6-ix-LDZ"/>
+                                    <constraint firstAttribute="width" secondItem="VCj-Jw-EHs" secondAttribute="height" multiplier="507:463" id="SAh-5k-RyB"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VN9-PB-H3v">
@@ -85,19 +86,19 @@
                             <constraint firstItem="BAy-Yd-YpR" firstAttribute="leading" secondItem="I6H-qn-2cZ" secondAttribute="leading" id="Cy0-Ku-ZgK"/>
                             <constraint firstItem="Hyz-4t-Z2E" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="20" symbolic="YES" id="HHj-px-YWH"/>
                             <constraint firstItem="Tzj-lb-g0B" firstAttribute="baseline" secondItem="I6H-qn-2cZ" secondAttribute="baseline" id="IYc-Ka-uXi"/>
-                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="trailing" secondItem="Tzj-lb-g0B" secondAttribute="trailing" id="L4r-Pv-HOU"/>
                             <constraint firstItem="VCj-Jw-EHs" firstAttribute="centerX" secondItem="VN9-PB-H3v" secondAttribute="centerX" id="L90-du-4Ho"/>
                             <constraint firstItem="Zc0-Lo-zBG" firstAttribute="baseline" secondItem="Hyz-4t-Z2E" secondAttribute="baseline" id="NRA-rw-jgy"/>
-                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="top" secondItem="VCj-Jw-EHs" secondAttribute="bottom" constant="8" symbolic="YES" id="OIb-Hd-5uo"/>
+                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="4" id="Q1b-34-n6A"/>
+                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="4" id="Ssg-6G-jcE"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="VCj-Jw-EHs" secondAttribute="trailing" id="UDK-rh-LrA"/>
                             <constraint firstItem="BAy-Yd-YpR" firstAttribute="top" secondItem="I6H-qn-2cZ" secondAttribute="bottom" constant="8" symbolic="YES" id="ZmH-d8-f2d"/>
                             <constraint firstItem="VCj-Jw-EHs" firstAttribute="top" secondItem="Hyz-4t-Z2E" secondAttribute="bottom" constant="8" symbolic="YES" id="bL9-9U-C48"/>
                             <constraint firstItem="Hyz-4t-Z2E" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="20" id="cg3-bs-k3A"/>
                             <constraint firstItem="9um-Qc-Q6g" firstAttribute="leading" secondItem="BAy-Yd-YpR" secondAttribute="trailing" constant="8" symbolic="YES" id="dtN-Eb-ZEe"/>
                             <constraint firstItem="Tzj-lb-g0B" firstAttribute="leading" secondItem="9um-Qc-Q6g" secondAttribute="leading" id="eFa-Jh-ky2"/>
                             <constraint firstItem="Tzj-lb-g0B" firstAttribute="leading" secondItem="I6H-qn-2cZ" secondAttribute="trailing" constant="8" symbolic="YES" id="gDL-Vw-tr9"/>
-                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="trailing" secondItem="Zc0-Lo-zBG" secondAttribute="trailing" id="iSu-Ag-Vhz"/>
-                            <constraint firstItem="VCj-Jw-EHs" firstAttribute="leading" secondItem="Hyz-4t-Z2E" secondAttribute="leading" id="jC6-si-DTg"/>
-                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="leading" secondItem="VCj-Jw-EHs" secondAttribute="leading" id="t6o-Yx-7Jb"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Zc0-Lo-zBG" secondAttribute="trailing" id="hY3-pt-Vho"/>
+                            <constraint firstItem="I6H-qn-2cZ" firstAttribute="top" secondItem="VCj-Jw-EHs" secondAttribute="bottom" constant="18" id="rI0-Wt-p9m"/>
                             <constraint firstItem="Tzj-lb-g0B" firstAttribute="trailing" secondItem="9um-Qc-Q6g" secondAttribute="trailing" id="xpk-Wj-sEl"/>
                         </constraints>
                     </view>
@@ -113,7 +114,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-848" y="-195"/>
+            <point key="canvasLocation" x="-848.79999999999995" y="-195.6521739130435"/>
         </scene>
         <!--Blood Glucose-->
         <scene sceneID="fT6-J7-dre">
