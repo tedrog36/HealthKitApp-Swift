@@ -9,7 +9,7 @@
 import Foundation
 import CoreBluetooth
 
-protocol BTDeviceManagerDelegate {
+protocol BTDeviceManagerDelegate: class {
     func deviceConnected(_ deviceName: String)
     func deviceDisconnected()
     func newBluetoothState(_ blueToothOn: Bool, blueToothState: String)
@@ -50,7 +50,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     // the heart rate monitor
     var heartRateMonitor : CBPeripheral?
     // the callback delegate
-    var delegate: BTDeviceManagerDelegate?
+    weak var delegate: BTDeviceManagerDelegate?
     
     // initializer
     override init() {
