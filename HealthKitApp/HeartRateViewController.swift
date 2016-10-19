@@ -182,7 +182,7 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
     
     // MARK: BTDeviceManagerDelegate
     
-    func newBluetoothState(_ blueToothOn: Bool, blueToothState: String) {
+    func newBluetoothState(blueToothOn: Bool, blueToothState: String) {
         print("blueToothOn = \(blueToothOn) blueToothState = \(blueToothState)")
         if (!blueToothOn) {
             heartBeatDuration = 0.0
@@ -190,7 +190,7 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         }
     }
     
-    func deviceConnected(_ deviceName: String) {
+    func deviceConnected(deviceName: String) {
         updateDeviceName(deviceName)
     }
     
@@ -199,13 +199,13 @@ class HeartRateViewController: UIViewController, BTDeviceManagerDelegate {
         updateDeviceName("No device connected")
     }
     
-    func newLocation(_ location: Int) {
+    func newLocation(location: Int) {
         if let newSensorLocation = HKHeartRateSensorLocation(rawValue: location) {
             deviceSensorLocation = newSensorLocation
         }
     }
     
-    func newBPM(_ bpm: UInt16) {
+    func newBPM(bpm: UInt16) {
         // check for presence of HealthKit with optional binding statement
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         if let healthStore = appDelegate.healthStore {

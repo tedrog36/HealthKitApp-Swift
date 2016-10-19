@@ -10,11 +10,11 @@ import Foundation
 import CoreBluetooth
 
 protocol BTDeviceManagerDelegate: class {
-    func deviceConnected(_ deviceName: String)
+    func deviceConnected(deviceName: String)
     func deviceDisconnected()
-    func newBluetoothState(_ blueToothOn: Bool, blueToothState: String)
-    func newLocation(_ location: Int)
-    func newBPM(_ bpm: UInt16)
+    func newBluetoothState(blueToothOn: Bool, blueToothState: String)
+    func newLocation(location: Int)
+    func newBPM(bpm: UInt16)
 }
 
 extension CBCentralManager {
@@ -114,7 +114,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         DispatchQueue.main.async() {
             print("bpm = \(bpm) length = \(data.count)")
             if let delegate = self.delegate {
-                delegate.newBPM(bpm)
+                delegate.newBPM(bpm: bpm)
             }
         }
     }
@@ -123,7 +123,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     func updateWithLocationData(_ location: UInt8) {
         DispatchQueue.main.async() {
             if let delegate = self.delegate {
-                delegate.newLocation(Int(location))
+                delegate.newLocation(location: Int(location))
             }
         }
     }
@@ -149,7 +149,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         }
         DispatchQueue.main.async() {
             if let delegate = self.delegate {
-                delegate.newBluetoothState(self.blueToothOn, blueToothState: self.blueToothState)
+                delegate.newBluetoothState(blueToothOn: self.blueToothOn, blueToothState: self.blueToothState)
             }
         }
     }
@@ -162,7 +162,7 @@ class BTDeviceManager : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         print("\(#function)")
         DispatchQueue.main.async() {
             if let delegate = self.delegate {
-                delegate.deviceConnected(peripheral.name!)
+                delegate.deviceConnected(deviceName: peripheral.name!)
             }
         }
         // get the id of this peripheral
